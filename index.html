@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cáncer de mama: prevención y cuidado</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>Cáncer de mama: prevención y cuidado</h1>
+  <nav id="nav" aria-label="Navegación principal"></nav>
+</header>
+
+<main id="app" tabindex="-1"></main>
+
+<!-- Gato interactivo -->
+<div id="gato">
+  <p id="gato-msg" role="status" aria-live="polite" hidden></p>
+  <button id="gato-btn" type="button" aria-label="Tocar al gato para ver un consejo">
+    <div id="gato-anim"></div>
+  </button>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+<script src="gato-data.js"></script>
+<script src="gato.js"></script>
+
+<!-- Oso polar interactivo -->
+<div id="oso">
+  <button id="oso-btn" type="button" aria-label="Despertar al oso polar">
+    <div id="oso-anim"></div>
+  </button>
+  <p id="oso-msg" role="status" aria-live="polite" hidden></p>
+</div>
+<script src="bear-data.js"></script>
+<script src="oso.js"></script>
+
+<script>
+/* =========================================================
+   UTILIDADES
+   ========================================================= */
+const $ = (sel, root = document) => root.querySelector(sel);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* =========================================================
+   DATOS DE CONTENIDO
+   ========================================================= */
+const GLOSARIO = [
+  ["Tumor", "Masa de células que crece de forma anormal. Puede ser benigna (no es cáncer) o maligna (cáncer)."],
+  ["Benigno / Maligno", "Benigno: no se disemina. Maligno: puede invadir tejidos cercanos o llegar a otros órganos."],
+  ["Metástasis", "Propagación de células cancerosas desde la mama hacia otras partes del cuerpo."],
+  ["Mamografía", "Radiografía de baja dosis de las mamas que permite detectar cambios antes de que se sientan."],
+  ["Tamización (cribado)", "Examen en personas sin síntomas para detectar la enfermedad de forma temprana."],
+  ["Diagnóstico temprano", "Reconocer signos y síntomas y consultar a tiempo para una evaluación clínica."],
+  ["BRCA1 / BRCA2", "Genes cuyas variantes hereditarias aumentan el riesgo de cáncer de mama y de ovario."],
+  ["Biopsia", "Toma de una pequeña muestra de tejido para analizarla y confirmar un diagnóstico."],
+  ["Autoexploración / conocimiento de las mamas", "Familiarizarse con el aspecto y la sensación normal de las propias mamas para notar cambios."],
+  ["EPS / IPS", "En Colombia: Entidad Promotora de Salud (asegura) e Institución Prestadora de Servicios de Salud (atiende)."]
+];
+
+const RIESGO_NO_MOD = [
+  "Edad: el riesgo aumenta con los años.",
+  "Sexo: es mucho más frecuente en mujeres, pero también puede ocurrir en hombres (poco frecuente).",
+  "Antecedentes familiares de cáncer de mama u ovario.",
+  "Variantes genéticas hereditarias (por ejemplo BRCA1 y BRCA2).",
+  "Antecedentes personales de lesiones mamarias o de cáncer de mama.",
+  "Menarquia temprana o menopausia tardía (más años de exposición hormonal)."
+];
+const RIESGO_MOD = [
+  "Exceso de peso, sobre todo después de la menopausia.",
+  "Consumo de alcohol.",
+  "Inactividad física.",
+  "Consumo de tabaco.",
+  "No haber amamantado, o primer embarazo después de los 30 años (factor reproductivo).",
+  "Terapia hormonal combinada de la menopausia (consulte siempre con su médico).",
+  "Exposición previa a radiación en el tórax."
+];
+const PROTECTORES = [
+  "Actividad física regular.",
+  "Mantener un peso saludable.",
+  "Limitar o evitar el alcohol.",
+  "Lactancia materna, cuando es posible y deseada.",
+  "Acceso oportuno a tamización y consulta ante cambios."
+];
+
+const SIGNOS = [
+  "Masa o bulto en la mama o en la axila.",
+  "Cambio en el tamaño o la forma de la mama.",
+  "Cambios en la piel (hundimientos, enrojecimiento, aspecto de “cáscara de naranja”).",
+  "Alteraciones del pezón (retracción, descamación, dolor).",
+  "Secreción por el pezón, especialmente si es sanguinolenta o aparece de un solo lado.",
+  "Inflamación de toda o una parte de la mama."
+];
+
+const PREVENCION = [
+  { nivel: "Primaria", pregunta: "¿Qué se puede hacer antes de que aparezca el problema?",
+    items: ["Actividad física regular y alimentación saludable.", "Mantener un peso adecuado.", "Reducir el consumo de alcohol y evitar el tabaco.", "Lactancia materna cuando sea posible.", "Educación en salud y conocimiento de los factores de riesgo."] },
+  { nivel: "Secundaria", pregunta: "¿Cómo se identifica tempranamente?",
+    items: ["Conocer las propias mamas y consultar ante cualquier cambio.", "Examen clínico de mama realizado por personal de salud.", "Mamografía de tamización según los grupos de edad definidos en Colombia (verifique la norma vigente en MinSalud / INC).", "Seguimiento especial si hay antecedentes familiares fuertes."] },
+  { nivel: "Terciaria", pregunta: "¿Qué se hace cuando la condición ya está presente?",
+    items: ["Tratamiento oportuno y seguimiento por el equipo de salud.", "Prevención de complicaciones y rehabilitación.", "Apoyo psicosocial y consejería en salud sexual y reproductiva.", "Información sobre preservación de la fertilidad cuando aplique.", "Acceso garantizado a servicios y acompañamiento de la familia."] }
+];
+
+const IMPORTANCIA = [
+  ["Salud individual y reproductiva", "Los tratamientos (cirugía, quimioterapia, radioterapia, terapia hormonal) pueden afectar la fertilidad, la función sexual y la imagen corporal."],
+  ["Calidad de vida", "El diagnóstico oportuno mejora las opciones de tratamiento y el bienestar físico, psicológico y social."],
+  ["Derechos sexuales y reproductivos", "Toda persona tiene derecho a información clara, consejería y apoyo psicosocial para tomar decisiones informadas y autónomas."],
+  ["Equidad", "El acceso a tamización y tratamiento no es igual en todos los territorios; reducir esa brecha es un asunto de justicia en salud."],
+  ["Impacto familiar y comunitario", "Muchas mujeres son cuidadoras o sostén del hogar; la enfermedad afecta la dinámica familiar, económica y social."]
+];
+
+const MITOS = [
+  { mito: "Solo las mujeres mayores tienen cáncer de mama.", real: false,
+    exp: "Es más frecuente con la edad, pero puede presentarse en mujeres jóvenes. Por eso todas las personas deben conocer los signos de alarma." },
+  { mito: "Solo las mujeres pueden tener cáncer de mama.", real: false,
+    exp: "También puede presentarse en hombres, aunque es poco frecuente (menos del 1 % de los casos). Cualquier bulto debe ser evaluado." },
+  { mito: "Si encuentro un bulto en la mama, seguro es cáncer.", real: false,
+    exp: "La mayoría de los bultos son benignos, pero siempre requieren valoración profesional. No se debe ni ignorar ni autodiagnosticar." },
+  { mito: "Si no tengo familiares con cáncer de mama, no me puede dar.", real: false,
+    exp: "La mayoría de las mujeres que desarrollan cáncer de mama no tienen antecedentes familiares claros. Tener o no antecedentes cambia el riesgo, no lo elimina." },
+  { mito: "La mamografía detecta cambios antes de que se puedan sentir.", real: true,
+    exp: "Es el objetivo de la tamización: encontrar la enfermedad en etapas tempranas, cuando hay más opciones de tratamiento." },
+  { mito: "Los desodorantes o antitranspirantes causan cáncer de mama.", real: false,
+    exp: "La evidencia científica disponible no ha demostrado esa relación." },
+  { mito: "La actividad física y un peso saludable pueden ayudar a reducir el riesgo.", real: true,
+    exp: "Son factores modificables reconocidos por las autoridades de salud, junto con limitar el alcohol." },
+  { mito: "El autoexamen en casa reemplaza la mamografía y la consulta médica.", real: false,
+    exp: "Conocer las propias mamas es útil para notar cambios, pero no sustituye el examen clínico ni la tamización indicada por el equipo de salud." }
+];
+
+const QUE_PUEDO_HACER = [
+  "Muévase: procure actividad física la mayoría de los días de la semana.",
+  "Mantenga un peso saludable y una alimentación equilibrada.",
+  "Reduzca o evite el alcohol y no fume.",
+  "Conozca cómo se ven y se sienten normalmente sus mamas para notar cambios.",
+  "Consulte pronto ante cualquier signo de alarma; no espere a que “se pase”.",
+  "Pregunte en su EPS/IPS por los controles y la tamización que le corresponden según su edad y antecedentes.",
+  "Converse con su familia: hablar del tema reduce el miedo y el tabú.",
+  "Si tiene antecedentes familiares importantes, coméntelo a su médico."
+];
+
+const DONDE = [
+  ["Cuándo consultar", "Ante cualquier cambio en las mamas o la axila, cuando le corresponda tamización según su edad, o si tiene antecedentes familiares."],
+  ["Quién atiende", "Primero medicina general o enfermería en su IPS (examen clínico, orientación, remisión). Luego, si se requiere, especialistas como mastología, ginecología u oncología."],
+  ["Cómo iniciar la ruta", "Solicite cita en su EPS/IPS. Si no logra atención, puede presentar una queja ante su EPS y ante la Superintendencia Nacional de Salud."]
+];
+const ENLACES_OFICIALES = [
+  ["Ministerio de Salud y Protección Social – Cáncer de mama", "https://www.minsalud.gov.co/salud/publica/ssr/paginas/cancer-de-mama.aspx"],
+  ["Instituto Nacional de Cancerología (INC)", "https://www.cancer.gov.co"],
+  ["Secretaría Distrital de Salud de Bogotá", "https://www.saludcapital.gov.co"],
+  ["Organización Mundial de la Salud – Cáncer de mama", "https://www.who.int/es/news-room/fact-sheets/detail/breast-cancer"],
+  ["Superintendencia Nacional de Salud", "https://www.supersalud.gov.co"]
+];
+
+const ROL_ENFERMERIA = [
+  ["Educación", "Explicar factores de riesgo, signos de alarma y autocuidado con lenguaje claro."],
+  ["Promoción y prevención", "Impulsar estilos de vida saludables y acciones comunitarias."],
+  ["Detección temprana", "Identificar factores de riesgo, realizar o apoyar el examen clínico y reconocer señales de alerta."],
+  ["Consejería y orientación", "Resolver dudas, disminuir el miedo y abordar la salud sexual y reproductiva."],
+  ["Acompañamiento", "Apoyar a la persona y su familia durante el diagnóstico, el tratamiento y la recuperación."],
+  ["Remisión oportuna", "Dirigir a los servicios de salud correspondientes sin demoras."],
+  ["Defensa de derechos", "Garantizar información, trato digno, autonomía y acceso a los servicios."]
+];
+
+const DIFERENCIAL = [
+  ["Edad", "Jóvenes: énfasis en conocer sus mamas y no ignorar cambios. Adultas mayores: mayor riesgo, importancia de la tamización periódica y del acompañamiento."],
+  ["Sexo y género", "Los hombres también pueden presentar cáncer de mama; la información no debe dirigirse solo a mujeres. Las personas trans pueden requerir orientación específica sobre su riesgo."],
+  ["Orientación sexual", "Ofrecer atención respetuosa y sin prejuicios; evitar suponer que no necesitan tamización."],
+  ["Cultura y territorio", "Zonas rurales o apartadas pueden tener menor acceso a servicios; adaptar mensajes a creencias y lenguas locales."],
+  ["Discapacidad", "Garantizar accesibilidad (equipos, información en formatos accesibles, acompañamiento)."],
+  ["Condición socioeconómica", "Reducir barreras de costos, tiempo y transporte; informar sobre rutas de atención."],
+  ["Contexto familiar", "Involucrar a la familia y la pareja cuando la persona lo desee; respetar su autonomía."],
+  ["Sobrevivientes", "Apoyo en imagen corporal, función sexual, fertilidad y bienestar emocional."]
+];
+
+/* =========================================================
+   PREGUNTAS DEL JUEGO
+   ========================================================= */
+const PREGUNTAS = [
+  { q: "¿Cuál de estos es un factor de riesgo MODIFICABLE del cáncer de mama?",
+    o: ["La edad", "El consumo de alcohol", "Los antecedentes familiares", "Las variantes genéticas heredadas"], a: 1,
+    e: "El alcohol, el exceso de peso y la inactividad física son factores sobre los que sí se puede actuar." },
+  { q: "¿Cuál es una señal de alarma en las mamas?",
+    o: ["Un bulto nuevo en la mama o la axila", "Cansancio después de hacer ejercicio", "Dolor de cabeza", "Sudoración nocturna únicamente"], a: 0,
+    e: "Un bulto o masa nueva debe ser valorado por un profesional de salud." },
+  { q: "Si noto un cambio en mi mama, lo más adecuado es:",
+    o: ["Esperar un par de meses a ver si se quita", "Buscar información en redes sociales y automedicarme", "Consultar pronto a un servicio de salud", "No decir nada para no preocupar a mi familia"], a: 2,
+    e: "La consulta oportuna no significa que sea cáncer, pero permite una valoración adecuada." },
+  { q: "¿Qué examen puede detectar cambios en la mama antes de que se puedan palpar?",
+    o: ["Mamografía", "Electrocardiograma", "Examen de glucosa", "Radiografía de rodilla"], a: 0,
+    e: "La mamografía de tamización busca detectar cambios en etapas tempranas." },
+  { q: "¿El cáncer de mama puede presentarse en hombres?",
+    o: ["No, es imposible", "Sí, aunque es poco frecuente", "Solo si toman medicamentos", "Solo en mayores de 90 años"], a: 1,
+    e: "Es poco frecuente (menos del 1 % de los casos), pero ocurre; todo bulto debe valorarse." },
+  { q: "¿Cuál de estas es una medida de prevención primaria?",
+    o: ["Realizar actividad física regular", "Recibir quimioterapia", "Hacer una biopsia", "Cirugía de reconstrucción"], a: 0,
+    e: "La prevención primaria actúa antes de que aparezca la enfermedad (estilos de vida saludables, educación)." },
+  { q: "Un bulto en la mama siempre significa que hay cáncer.",
+    o: ["Verdadero", "Falso: muchos bultos son benignos, pero siempre deben evaluarse"], a: 1,
+    e: "No hay que alarmarse ni ignorarlo: se necesita valoración profesional." },
+  { q: "¿Cuál es la diferencia entre diagnóstico temprano y tamización?",
+    o: ["Son exactamente lo mismo", "El diagnóstico temprano parte de signos y síntomas; la tamización se hace en personas sin síntomas", "La tamización solo se hace en hombres", "El diagnóstico temprano solo se hace con mamografía"], a: 1,
+    e: "La OMS distingue ambos conceptos: reconocer síntomas y consultar vs. buscar la enfermedad en personas asintomáticas." },
+  { q: "¿Qué papel cumple enfermería en la prevención del cáncer de mama?",
+    o: ["Solo administra medicamentos", "Educa, orienta, detecta factores de riesgo, acompaña y remite oportunamente", "Solo realiza cirugías", "No tiene ningún papel"], a: 1,
+    e: "Enfermería es clave en educación, promoción, detección temprana, consejería y defensa de derechos." },
+  { q: "Los antitranspirantes o desodorantes causan cáncer de mama.",
+    o: ["Verdadero", "Falso: la evidencia no ha demostrado esa relación"], a: 1,
+    e: "Es un mito frecuente que no cuenta con respaldo científico." }
+];
+
+/* =========================================================
+   PÁGINAS (cada una devuelve HTML y opcionalmente init())
+   ========================================================= */
+const lista = (arr) => "<ul>" + arr.map(i => `<li>${esc(i)}</li>`).join("") + "</ul>";
+const pares = (arr) => "<dl>" + arr.map(([t, d]) => `<dt><strong>${esc(t)}</strong></dt><dd>${esc(d)}</dd>`).join("") + "</dl>";
+
+const PAGES = [
+  { id: "inicio", title: "Inicio", landing: true,
+    html: () => {
+      const total = GROUPS.reduce((n, g) => n + g.items.length, 0);
+      return `
+      <h2>Cáncer de mama: conocer, prevenir y actuar</h2>
+      <p>Toca el tema que te interese. Los que ya viste aparecen con ✓.</p>
+      <p><button data-go="presentacion">Empezar por el principio</button>
+         <button data-go="juego">Ir a los juegos</button></p>
+      <div id="hub">
+        ${GROUPS.map(g => `
+          <section class="grupo grupo-${g.color}">
+            <h3>${esc(g.name)}</h3>
+            <div class="cards">
+              ${g.items.map(([id, d]) => {
+                const p = PAGES.find(x => x.id === id);
+                return `<button class="card-btn" data-go="${id}"><strong>${visited.has(id) ? "✓ " : ""}${esc(p.title)}</strong><span>${esc(d)}</span></button>`;
+              }).join("")}
+            </div>
+          </section>`).join("")}
+      </div>
+`;
+    },
+  },
+
+  { id: "presentacion", title: "¿Qué es el cáncer de mama?",
+    html: () => `
+      <h2>Presentación del tema</h2>
+      <h3>¿Qué es?</h3>
+      <p>El cáncer de mama es una enfermedad en la que células del tejido mamario crecen de forma descontrolada y pueden formar un tumor.</p>
+      <h3>¿Por qué importa?</h3>
+      <p>Es uno de los cánceres más frecuentes en mujeres en el mundo y en Colombia. Detectarlo a tiempo mejora las opciones de tratamiento y la calidad de vida.</p>
+      <h3>¿A quién puede afectar?</h3>
+      <p>Principalmente a mujeres de cualquier etapa de la vida adulta, con mayor riesgo con la edad. También puede afectar a hombres (poco frecuente). Es especialmente relevante en mujeres de comunidades con menor acceso a servicios y en sobrevivientes.</p>
+      <h3>¿Por qué es un tema de salud sexual y reproductiva?</h3>
+      ${lista([
+        "Fertilidad: algunos tratamientos pueden afectar la función ovárica.",
+        "Función sexual: puede haber cambios en el deseo, la excitación, la lubricación y la satisfacción.",
+        "Imagen corporal y bienestar emocional: cirugías, pérdida de cabello y cambios hormonales pueden afectar la autoestima.",
+        "Derechos sexuales y reproductivos: acceso a información, consejería y apoyo psicosocial."
+      ])}` },
+
+  { id: "definiciones", title: "Glosario",
+    html: () => `<h2>Definiciones y conceptos (glosario)</h2>${pares(GLOSARIO)}` },
+
+  { id: "magnitud", title: "Cifras del problema",
+    html: () => `
+      <h2>Magnitud del problema</h2>
+      <h3>Nivel mundial</h3>
+      <ul>
+        <li>En 2022 se diagnosticaron alrededor de 2,3 millones de casos de cáncer de mama y se registraron unas 670.000 muertes en el mundo. Población: mujeres a nivel mundial. Fuente: Organización Mundial de la Salud (2024), hoja informativa “Cáncer de mama”.</li>
+      </ul>
+      <h3>Colombia / Bogotá</h3>
+      <p>El Ministerio de Salud y Protección Social reconoce el cáncer de mama como una de las principales causas de enfermedad y muerte por cáncer en mujeres del país.</p>
+      <p><strong>Cifras locales:</strong> no se incluyen aquí cifras de incidencia o mortalidad para Colombia o Bogotá porque deben verificarse directamente en la fuente oficial (año, población, territorio y fuente). Consúltelas en:</p>
+      <ul>
+        <li><a href="https://www.minsalud.gov.co/salud/publica/ssr/paginas/cancer-de-mama.aspx" target="_blank" rel="noopener">Ministerio de Salud y Protección Social</a></li>
+        <li><a href="https://www.cancer.gov.co" target="_blank" rel="noopener">Instituto Nacional de Cancerología</a></li>
+        <li><a href="https://www.saludcapital.gov.co" target="_blank" rel="noopener">Secretaría Distrital de Salud de Bogotá</a></li>
+      </ul>
+      <p><em>Nota: si no hay datos locales disponibles, se usa el nivel geográfico más cercano.</em></p>` },
+
+  { id: "riesgo", title: "Factores de riesgo y protectores",
+    html: () => `
+      <h2>Factores de riesgo y protectores</h2>
+      <p>Seleccione una categoría:</p>
+      <p>
+        <button data-tab="nomod">No modificables</button>
+        <button data-tab="mod">Modificables</button>
+        <button data-tab="prot">Protectores</button>
+        <button data-tab="soc">Sociales y de acceso</button>
+      </p>
+      <div id="riesgo-contenido"></div>`,
+    init: () => {
+      const cont = $("#riesgo-contenido");
+      const data = {
+        nomod: ["Factores no modificables (biológicos)", lista(RIESGO_NO_MOD)],
+        mod: ["Factores modificables (conductuales y reproductivos)", lista(RIESGO_MOD)],
+        prot: ["Factores protectores", lista(PROTECTORES)],
+        soc: ["Factores sociales, culturales, educativos y de acceso a servicios", lista([
+          "Desconocimiento de los signos de alarma y de la importancia de la tamización.",
+          "Miedo al diagnóstico y tabúes culturales.",
+          "Barreras económicas, de tiempo o de transporte.",
+          "Desconocimiento de las rutas de atención.",
+          "Menor disponibilidad de servicios en algunos territorios."
+        ])]
+      };
+      const show = (k) => { cont.innerHTML = `<h3>${data[k][0]}</h3>${data[k][1]}`; };
+      document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => show(b.dataset.tab)));
+      show("nomod");
+    } },
+
+  { id: "signos", title: "Señales de alerta",
+    html: () => `
+      <h2>Signos, síntomas y señales de alerta</h2>
+      <p>Consulte a un servicio de salud si nota alguno de estos cambios:</p>
+      ${lista(SIGNOS)}
+      <p><strong>Importante:</strong> estos cambios no significan necesariamente que exista cáncer, pero requieren valoración profesional. Esta información no sirve para autodiagnosticarse.</p>` },
+
+  { id: "prevencion", title: "Prevención",
+    html: () => `
+      <h2>Prevención y control</h2>
+      <p>Seleccione el nivel de prevención:</p>
+      <p>${PREVENCION.map((p, i) => `<button data-prev="${i}">${p.nivel}</button>`).join(" ")}</p>
+      <div id="prev-contenido"></div>
+      <p><em>Las recomendaciones de tamización varían según edad y antecedentes; verifique la norma vigente en MinSalud o el INC.</em></p>`,
+    init: () => {
+      const cont = $("#prev-contenido");
+      const show = (i) => { const p = PREVENCION[i]; cont.innerHTML = `<h3>Prevención ${p.nivel.toLowerCase()}</h3><p><em>${esc(p.pregunta)}</em></p>${lista(p.items)}`; };
+      document.querySelectorAll("[data-prev]").forEach(b => b.addEventListener("click", () => show(+b.dataset.prev)));
+      show(0);
+    } },
+
+  { id: "importancia", title: "Por qué es importante",
+    html: () => `<h2>Importancia del tema</h2>${pares(IMPORTANCIA)}` },
+
+  { id: "mitos", title: "Mitos y realidades",
+    html: () => `
+      <h2>Mitos y realidades</h2>
+      <p>Lea cada afirmación y elija si es un mito o una realidad.</p>
+      <div id="mitos-lista">
+        ${MITOS.map((m, i) => `
+          <section data-mito="${i}">
+            <p><strong>${i + 1}. ${esc(m.mito)}</strong></p>
+            <button data-resp="true">Es realidad</button>
+            <button data-resp="false">Es mito</button>
+            <p class="resultado" aria-live="polite"></p>
+          </section>`).join("")}
+      </div>
+      <p id="mitos-puntaje"></p>`,
+    init: () => {
+      let correctas = 0, respondidas = 0;
+      document.querySelectorAll("[data-mito]").forEach(sec => {
+        const idx = +sec.dataset.mito;
+        sec.querySelectorAll("[data-resp]").forEach(btn => btn.addEventListener("click", () => {
+          if (sec.dataset.done) return;
+          sec.dataset.done = "1";
+          const resp = btn.dataset.resp === "true";
+          const m = MITOS[idx];
+          const ok = resp === m.real;
+          respondidas++; if (ok) correctas++;
+          sec.querySelector(".resultado").textContent =
+            (ok ? "¡Correcto! " : "No exactamente. ") + (m.real ? "Es una REALIDAD. " : "Es un MITO. ") + m.exp;
+          sec.querySelectorAll("button").forEach(b => b.disabled = true);
+          $("#mitos-puntaje").textContent = `Respondidas: ${respondidas}/${MITOS.length} · Correctas: ${correctas}`;
+        }));
+      });
+    } },
+
+  { id: "hacer", title: "¿Qué puedo hacer?",
+    html: () => `<h2>¿Qué puedo hacer para cuidar mi salud?</h2>${lista(QUE_PUEDO_HACER)}` },
+
+  { id: "donde", title: "¿Dónde puedo acudir?",
+    html: () => `
+      <h2>¿Dónde puedo acudir?</h2>
+      ${pares(DONDE)}
+      <h3>Fuentes oficiales</h3>
+      <ul>${ENLACES_OFICIALES.map(([t, u]) => `<li><a href="${u}" target="_blank" rel="noopener">${esc(t)}</a></li>`).join("")}</ul>
+      <p><em>Para líneas telefónicas, direcciones y servicios actualizados, consulte los sitios oficiales o su EPS/IPS verificada.</em></p>` },
+
+  { id: "enfermeria", title: "El papel de Enfermería",
+    html: () => `<h2>¿Cuál es el papel de Enfermería?</h2>${pares(ROL_ENFERMERIA)}` },
+
+  { id: "diferencial", title: "Enfoque diferencial e inclusivo",
+    html: () => `<h2>Enfoque diferencial e inclusivo</h2>${pares(DIFERENCIAL)}` },
+
+  { id: "casos", title: "Casos para practicar",
+    html: () => `
+      <h2>Casos para practicar: ¿qué harías?</h2>
+      <p>Lee cada situación y elige la mejor decisión. Son casos ficticios para practicar.</p>
+      ${CASOS.map((c, i) => `
+        <section data-caso="${i}">
+          <h3>Caso ${i + 1}: ${esc(c.t)}</h3>
+          <p>${esc(c.s)}</p>
+          ${c.o.map((t, j) => `<p><button data-opt="${j}">${esc(t)}</button></p>`).join("")}
+          <p class="resultado" aria-live="polite"></p>
+        </section>`).join("")}`,
+    init: () => {
+      document.querySelectorAll("[data-caso]").forEach(sec => {
+        const c = CASOS[+sec.dataset.caso];
+        sec.querySelectorAll("[data-opt]").forEach(b => b.addEventListener("click", () => {
+          const ok = +b.dataset.opt === c.a;
+          sec.querySelector(".resultado").textContent = (ok ? "¡Buena decisión! " : "Piénsalo de nuevo. ") + c.e;
+          sec.querySelectorAll("[data-opt]").forEach(x => x.disabled = true);
+        }));
+      });
+    } },
+
+  { id: "juego", title: "Juegos",
+    html: () => `
+      <h2>Juegos educativos</h2>
+      <p>Elige un juego. Cada acierto suma puntos y al final verás tu resultado.</p>
+      <p><button data-g="quiz">Quiz de conocimientos</button>
+         <button data-g="sort">Clasificador rápido</button></p>
+      <div id="juego"></div>`,
+    init: () => {
+      const area = $("#juego");
+      const run = { quiz: () => initGame(area), sort: () => initSort(area) };
+      document.querySelectorAll("[data-g]").forEach(b => b.addEventListener("click", () => run[b.dataset.g]()));
+      run.quiz();
+    } },
+
+  { id: "api", title: "Explorar en línea",
+    html: () => `
+      <h2>Explorar en línea</h2>
+      <p>Cuatro herramientas conectadas a servicios públicos reales (necesitan internet). Elige una pestaña. Son fuentes externas: contrástalas con las fuentes oficiales.</p>
+      <p><button data-api="concepts">Conceptos</button>
+         <button data-api="pubmed">Investigación</button>
+         <button data-api="trials">Estudios clínicos</button>
+         <button data-api="data">Datos de pacientes</button></p>
+      <div id="api-out"></div>`,
+    init: () => initApi() },
+
+];
+
+/* =========================================================
+   JUEGO
+   ========================================================= */
+function initGame(root) {
+  let idx = 0, score = 0, order = [], answered = false;
+
+  const shuffle = (arr) => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  function start() {
+    idx = 0; score = 0; answered = false;
+    order = shuffle(PREGUNTAS.map((_, i) => i));
+    root.innerHTML = `
+      <p>Responde ${PREGUNTAS.length} preguntas. Cada respuesta correcta suma 10 puntos.</p>
+      <button id="g-start">Comenzar juego</button>`;
+    $("#g-start", root).addEventListener("click", render);
+  }
+
+  function render() {
+    answered = false;
+    const p = PREGUNTAS[order[idx]];
+    root.innerHTML = `
+      <p>Pregunta ${idx + 1} de ${PREGUNTAS.length} · Puntaje: <strong>${score}</strong></p>
+      <h3>${esc(p.q)}</h3>
+      <div id="g-opts">${p.o.map((t, i) => `<p><button data-opt="${i}">${String.fromCharCode(65 + i)}. ${esc(t)}</button></p>`).join("")}</div>
+      <p id="g-fb" aria-live="polite"></p>
+      <p><button id="g-next" hidden>${idx + 1 === PREGUNTAS.length ? "Ver resultado" : "Siguiente pregunta"}</button></p>`;
+    root.querySelectorAll("[data-opt]").forEach(b => b.addEventListener("click", () => answer(+b.dataset.opt)));
+    $("#g-next", root).addEventListener("click", next);
+  }
+
+  function answer(i) {
+    if (answered) return;
+    answered = true;
+    const p = PREGUNTAS[order[idx]];
+    const ok = i === p.a;
+    if (ok) score += 10;
+    $("#g-fb", root).textContent = (ok ? "¡Correcto! +10 puntos. " : `Incorrecto. La respuesta correcta era: ${p.o[p.a]}. `) + p.e;
+    root.querySelectorAll("[data-opt]").forEach(b => b.disabled = true);
+    $("#g-next", root).hidden = false;
+  }
+
+  function next() {
+    idx++;
+    if (idx >= PREGUNTAS.length) return finish();
+    render();
+  }
+
+  function finish() {
+    const max = PREGUNTAS.length * 10;
+    const pct = Math.round((score / max) * 100);
+    const msg = pct >= 80 ? "¡Excelente! Tienes muy buenos conocimientos."
+      : pct >= 50 ? "¡Bien! Repasa los apartados para reforzar lo aprendido."
+      : "Te recomendamos revisar los apartados y volver a intentarlo.";
+    root.innerHTML = `
+      <h3>Juego terminado</h3>
+      <p>Puntaje final: <strong>${score} / ${max}</strong> (${pct} %)</p>
+      <p>${msg}</p>
+      <p><button id="g-again">Jugar de nuevo</button>
+         <button data-go="signos">Repasar signos de alerta</button>
+         <button data-go="mitos">Repasar mitos y realidades</button></p>`;
+    $("#g-again", root).addEventListener("click", start);
+    bindGo(root);
+  }
+
+  start();
+}
+
+/* =========================================================
+   API (servicios públicos con CORS habilitado)
+   ========================================================= */
+const shuffle = (arr) => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+function initApi() {
+  const out = $("#api-out");
+  const getJSON = async (u) => {
+    const c = new AbortController(), t = setTimeout(() => c.abort(), 12000);
+    try { const r = await fetch(u, { signal: c.signal }); if (!r.ok) throw new Error("HTTP " + r.status); return await r.json(); }
+    finally { clearTimeout(t); }
+  };
+  const fail = (box, e) => { box.innerHTML = `<p>No se pudo cargar la información (${e.name === "AbortError" ? "tardó demasiado" : esc(e.message)}). Revisa tu conexión e intenta de nuevo.</p>`; };
+  const loading = (box) => { box.innerHTML = "<p>Cargando...</p>"; };
+  const chips = (list) => `<p>${list.map(([l, q]) => `<button data-q="${esc(q)}">${esc(l)}</button>`).join("")}</p>`;
+  const wireChips = (run) => out.querySelectorAll("[data-q]").forEach(b => b.addEventListener("click", () => run(b.dataset.q)));
+
+  // 1. Conceptos (Wikipedia en español)
+  function concepts() {
+    const lista = ["Mamografía", "Biopsia", "Mastectomía", "Quimioterapia", "Radioterapia", "BRCA1", "Linfedema"].map(t => [t, t]);
+    out.innerHTML = `<h3>Explora un concepto</h3>
+      <p>Toca un término o escribe el tuyo. Información de Wikipedia en español.</p>
+      ${chips(lista)}
+      <p><input type="text" id="q" placeholder="Ej.: tamoxifeno"> <button id="qgo">Buscar</button></p>
+      <div id="res"></div>`;
+    const res = $("#res");
+    const run = async (term) => {
+      if (!term) return;
+      loading(res);
+      try {
+        const s = await getJSON(`https://es.wikipedia.org/w/api.php?action=opensearch&limit=1&format=json&origin=*&search=${encodeURIComponent(term)}`);
+        const title = s[1]?.[0];
+        if (!title) { res.innerHTML = "<p>Sin resultados. Prueba con otro término.</p>"; return; }
+        const d = await getJSON(`https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
+        res.innerHTML = `<h3>${esc(d.title)}</h3>
+          ${d.thumbnail ? `<p><img src="${esc(d.thumbnail.source)}" alt="${esc(d.title)}"></p>` : ""}
+          <p>${esc(d.extract)}</p>
+          <p>Fuente: Wikipedia (es). <a href="${esc(d.content_urls?.desktop?.page || "#")}" target="_blank" rel="noopener">Ver artículo completo</a></p>
+          <p><em>Contenido general; no reemplaza la orientación de un profesional de salud.</em></p>`;
+      } catch (e) { fail(res, e); }
+    };
+    wireChips(run);
+    $("#qgo").addEventListener("click", () => run($("#q").value.trim()));
+    $("#q").addEventListener("keydown", (e) => { if (e.key === "Enter") run(e.target.value.trim()); });
+    run("Mamografía");
+  }
+
+  // 2. Datos de pacientes (NCI Genomic Data Commons, proyecto TCGA-BRCA)
+  function data() {
+    const VARS = { "demographic.gender": "Sexo", "demographic.vital_status": "Estado vital",
+      "diagnoses.ajcc_pathologic_stage": "Estadio patológico", "diagnoses.primary_diagnosis": "Tipo de tumor" };
+    const TR = { female: "Mujer", male: "Hombre", alive: "Vivo/a", dead: "Fallecido/a", "not reported": "No reportado", _missing: "Sin dato" };
+    out.innerHTML = `<h3>Explora datos reales de pacientes</h3>
+      <p>Elige una variable y mira cómo se distribuyen los casos del proyecto TCGA-BRCA (Instituto Nacional del Cáncer, EE. UU.).</p>
+      <p><label>Variable:
+        <select id="var">${Object.entries(VARS).map(([k, l]) => `<option value="${k}">${l}</option>`).join("")}</select></label></p>
+      <div id="res"></div>
+      <p><em>Son datos de investigación de personas participantes en un proyecto de EE. UU.; no representan la frecuencia del cáncer de mama en una población ni sirven para estimar riesgo individual.</em></p>`;
+    const res = $("#res");
+    const run = async () => {
+      const f = $("#var").value;
+      loading(res);
+      try {
+        const filters = encodeURIComponent(JSON.stringify({ op: "in", content: { field: "project.project_id", value: ["TCGA-BRCA"] } }));
+        const d = await getJSON(`https://api.gdc.cancer.gov/cases?size=0&facets=${f}&filters=${filters}`);
+        const total = d.data.pagination.total;
+        const rows = (d.data.aggregations[f]?.buckets || []).sort((a, b) => b.doc_count - a.doc_count).slice(0, 10);
+        res.innerHTML = `<p>Casos analizados: <strong>${total}</strong>. Variable: <strong>${esc(VARS[f])}</strong></p>` +
+          rows.map(r => {
+            const k = String(r.key);
+            const label = TR[k.toLowerCase()] || k.replace(/^stage /i, "Estadio ");
+            return `<div class="fila"><span>${esc(label)}</span><progress value="${r.doc_count}" max="${total}"></progress><b>${r.doc_count} (${Math.round(r.doc_count / total * 100)} %)</b></div>`;
+          }).join("") + "<p>Fuente: NCI Genomic Data Commons.</p>";
+      } catch (e) { fail(res, e); }
+    };
+    $("#var").addEventListener("change", run);
+    run();
+  }
+
+  // 3. Estudios clínicos por país (ClinicalTrials.gov)
+  function trials() {
+    const paises = [["Colombia", "Colombia"], ["Mexico", "México"], ["Chile", "Chile"], ["Spain", "España"], ["United States", "Estados Unidos"]];
+    const estados = [["RECRUITING", "Reclutando participantes"], ["NOT_YET_RECRUITING", "Aún no reclutan"], ["COMPLETED", "Completados"]];
+    const opts = (a) => a.map(([v, l]) => `<option value="${v}">${l}</option>`).join("");
+    out.innerHTML = `<h3>Estudios clínicos sobre cáncer de mama</h3>
+      <p>Los estudios clínicos son investigaciones que prueban nuevas formas de prevenir, detectar o tratar la enfermedad. Participar es voluntario y se decide con el equipo de salud.</p>
+      <p><label>País: <select id="pais">${opts(paises)}</select></label>
+         <label>Estado: <select id="est">${opts(estados)}</select></label></p>
+      <div id="res"></div>`;
+    const res = $("#res");
+    const run = async () => {
+      loading(res);
+      try {
+        const u = `https://clinicaltrials.gov/api/v2/studies?query.cond=${encodeURIComponent("breast cancer")}&query.locn=${encodeURIComponent($("#pais").value)}&filter.overallStatus=${$("#est").value}&pageSize=8&countTotal=true`;
+        const d = await getJSON(u);
+        const list = d.studies || [];
+        if (!list.length) { res.innerHTML = "<p>No se encontraron estudios con esos filtros.</p>"; return; }
+        res.innerHTML = `<p>Estudios encontrados: <strong>${esc(d.totalCount ?? list.length)}</strong> (mostrando ${list.length})</p><ol>` +
+          list.map(s => {
+            const p = s.protocolSection || {}, id = p.identificationModule?.nctId || "";
+            return `<li><a href="https://clinicaltrials.gov/study/${esc(id)}" target="_blank" rel="noopener">${esc(p.identificationModule?.briefTitle || id)}</a><br>${esc(id)}</li>`;
+          }).join("") + "</ol><p>Fuente: ClinicalTrials.gov (NIH, EE. UU.).</p>";
+      } catch (e) { fail(res, e); }
+    };
+    $("#pais").addEventListener("change", run);
+    $("#est").addEventListener("change", run);
+    run();
+  }
+
+  // 4. Investigación científica (PubMed)
+  function pubmed() {
+    out.innerHTML = `<h3>Investigación científica de los últimos 5 años</h3>
+      <p>Artículos de revistas científicas (PubMed, Biblioteca Nacional de Medicina de EE. UU.). Casi todos están en inglés. Toca un tema:</p>
+      ${chips([["Prevención", "breast cancer prevention"], ["Detección temprana", "breast cancer early detection screening"], ["En hombres", "male breast cancer"], ["Colombia", "breast cancer Colombia"], ["Salud sexual", "breast cancer survivors sexual health"]])}
+      <div id="res"></div>`;
+    const res = $("#res");
+    const run = async (t) => {
+      loading(res);
+      try {
+        const q = encodeURIComponent(t);
+        const s = await getJSON(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmode=json&retmax=8&sort=date&datetype=pdat&reldate=1825&term=${q}`);
+        const ids = s.esearchresult?.idlist || [];
+        if (!ids.length) { res.innerHTML = "<p>No se encontraron artículos.</p>"; return; }
+        const m = await getJSON(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id=${ids.join(",")}`);
+        res.innerHTML = `<p>Artículos encontrados: <strong>${esc(s.esearchresult.count)}</strong> (mostrando los ${ids.length} más recientes)</p><ol>` +
+          ids.map(id => { const a = m.result[id]; return `<li><a href="https://pubmed.ncbi.nlm.nih.gov/${esc(id)}/" target="_blank" rel="noopener">${esc(a.title)}</a><br>${esc(a.source)} · ${esc(a.pubdate)}</li>`; }).join("") +
+          "</ol><p>Fuente: NCBI PubMed.</p>";
+      } catch (e) { fail(res, e); }
+    };
+    wireChips(run);
+    run("breast cancer prevention");
+  }
+
+  const tabs = { concepts, pubmed, trials, data };
+  const botones = document.querySelectorAll("[data-api]");
+  const abrir = (b) => { botones.forEach(x => x.classList.toggle("activa", x === b)); tabs[b.dataset.api](); };
+  botones.forEach(b => b.addEventListener("click", () => abrir(b)));
+  abrir(botones[0]);
+}
+
+/* =========================================================
+   JUEGO 2: CLASIFICADOR RÁPIDO
+   ========================================================= */
+const CAT = { R: "Factor de riesgo", P: "Factor protector", S: "Señal de alarma", N: "Mito / sin relación" };
+const CLAS = [
+  ["Consumo frecuente de alcohol", "R"], ["Actividad física regular", "P"], ["Bulto nuevo en la axila", "S"],
+  ["Usar antitranspirante", "N"], ["Exceso de peso después de la menopausia", "R"], ["Lactancia materna", "P"],
+  ["Secreción por el pezón de un solo lado", "S"], ["Usar sostén con varilla", "N"],
+  ["Antecedentes familiares de cáncer de mama", "R"], ["Mantener un peso saludable", "P"],
+  ["Hundimiento o enrojecimiento de la piel de la mama", "S"], ["Un golpe leve en la mama", "N"]
+];
+
+function initSort(root) {
+  let order, i, score, streak;
+  const start = () => { order = shuffle(CLAS); i = 0; score = 0; streak = 0; render(); };
+  function render() {
+    const [txt] = order[i];
+    root.innerHTML = `
+      <p>Elemento ${i + 1} de ${order.length} · Puntaje: <strong>${score}</strong> · Racha: <strong>${streak}</strong></p>
+      <h3>${esc(txt)}</h3>
+      <p>¿Dónde lo clasificas?</p>
+      <div id="s-opts">${Object.entries(CAT).map(([k, l]) => `<button data-c="${k}">${l}</button>`).join("")}</div>
+      <p id="s-fb" aria-live="polite"></p>
+      <p><button id="s-next" hidden>${i + 1 === order.length ? "Ver resultado" : "Siguiente"}</button></p>`;
+    root.querySelectorAll("[data-c]").forEach(b => b.addEventListener("click", () => answer(b.dataset.c)));
+    $("#s-next", root).addEventListener("click", () => { i++; i >= order.length ? finish() : render(); });
+  }
+  function answer(c) {
+    const right = order[i][1], ok = c === right;
+    if (ok) { streak++; score += 10 + (streak >= 3 ? 5 : 0); } else streak = 0;
+    $("#s-fb", root).textContent = ok ? `¡Correcto! Es: ${CAT[right]}.${streak >= 3 ? " ¡Bonus de racha +5!" : ""}` : `No exactamente. Es: ${CAT[right]}.`;
+    root.querySelectorAll("[data-c]").forEach(b => b.disabled = true);
+    $("#s-next", root).hidden = false;
+  }
+  function finish() {
+    root.innerHTML = `<h3>Juego terminado</h3>
+      <p>Puntaje final: <strong>${score}</strong> (máximo sin racha: ${order.length * 10})</p>
+      <p>Repasa los apartados de factores de riesgo y señales de alerta para reforzar lo aprendido.</p>
+      <p><button id="s-again">Jugar de nuevo</button> <button data-go="riesgo">Ver factores de riesgo</button> <button data-go="signos">Ver señales de alerta</button></p>`;
+    $("#s-again", root).addEventListener("click", start);
+    bindGo(root);
+  }
+  start();
+}
+
+/* =========================================================
+   NAVEGACIÓN
+   ========================================================= */
+const visited = new Set();
+
+const GROUPS = [
+  { name: "Conocer el tema", color: "yellow", items: [
+    ["presentacion", "Qué es, por qué importa y a quién afecta"], ["definiciones", "Glosario en lenguaje sencillo"],
+    ["magnitud", "Cifras mundiales y fuentes en Colombia"], ["importancia", "Salud, derechos y equidad"]] },
+  { name: "Prevenir y detectar", color: "teal", items: [
+    ["riesgo", "Qué aumenta o reduce el riesgo"], ["signos", "Cuándo acudir a un servicio de salud"],
+    ["prevencion", "Prevención primaria, secundaria y terciaria"], ["hacer", "Acciones concretas para cuidarte"]] },
+  { name: "Actuar y acudir", color: "pink", items: [
+    ["donde", "Rutas y fuentes oficiales en Colombia"], ["enfermeria", "Qué hace Enfermería"],
+    ["diferencial", "Edad, género, cultura, territorio"]] },
+  { name: "Aprender jugando", color: "lavender", items: [
+    ["mitos", "Mitos y realidades"], ["casos", "Casos para decidir"],
+    ["juego", "Quiz y clasificador con puntaje"], ["api", "Conceptos, datos, estudios e imágenes en línea"]] },
+];
+
+const CASOS = [
+  { t: "Un bulto y mucho miedo", s: "Laura, de 34 años, nota un bulto pequeño en una mama. Piensa: “seguro es cáncer, mejor no ir”.",
+    o: ["Esperar unos meses a ver si desaparece", "Pedir una cita en su EPS/IPS para que la valore un profesional", "Buscar en internet y automedicarse"], a: 1,
+    e: "Muchos bultos son benignos, pero solo una valoración profesional lo confirma. Consultar pronto es lo adecuado." },
+  { t: "Un hombre con un cambio en el pecho", s: "Carlos, de 58 años, siente un bulto detrás del pezón. Le da vergüenza porque “eso es de mujeres”.",
+    o: ["Consultar: el cáncer de mama también puede ocurrir en hombres", "No decir nada porque es muy raro", "Esperar a que duela"], a: 0,
+    e: "Es poco frecuente, pero ocurre. Cualquier cambio en el pecho debe valorarse sin pena." },
+  { t: "Sin síntomas, pero con dudas", s: "Rosa, de 55 años, vive en una zona rural y no sabe si le corresponde una mamografía.",
+    o: ["Preguntar en su EPS/IPS qué tamización le corresponde según su edad y la norma vigente", "Pensar que sin síntomas no necesita nada", "Esperar a que alguien la llame"], a: 0,
+    e: "La tamización busca la enfermedad en personas sin síntomas. Pedir orientación es el primer paso." },
+  { t: "Una sobreviviente con preguntas íntimas", s: "Marta terminó su tratamiento y siente sequedad e inseguridad en su intimidad, pero le da pena preguntar.",
+    o: ["Callar: es normal que la vida sexual se acabe", "Hablarlo con su equipo de salud o con Enfermería: existe consejería y apoyo", "Resolverlo sola sin consultar"], a: 1,
+    e: "La salud sexual forma parte del bienestar. Hay orientación y apoyo psicosocial, y es un derecho recibirlos." }
+];
+
+function bindGo(root = document) {
+  root.querySelectorAll("[data-go]").forEach(b => {
+    if (b.dataset.bound) return;
+    b.dataset.bound = "1";
+    b.addEventListener("click", () => goTo(b.dataset.go));
+  });
+}
+
+let current = 0;
+const pageById = (id) => PAGES.find(p => p.id === id);
+
+function renderNav() {
+  const nav = $("#nav");
+  nav.innerHTML = PAGES[current].landing ? "" : `<button data-go="inicio">← Volver al inicio</button>`;
+  bindGo(nav);
+}
+
+function goTo(id) {
+  const i = PAGES.findIndex(p => p.id === id);
+  if (i < 0) return;
+  current = i;
+  const page = PAGES[i];
+  const app = $("#app");
+  const content = GROUPS.flatMap(g => g.items.map(([k]) => pageById(k)));
+  const pos = content.findIndex(p => p.id === page.id);
+  const grupo = GROUPS.find(g => g.items.some(([k]) => k === id));
+
+  let miga = "", controls = "";
+  if (!page.landing) {
+    visited.add(id);
+    const prev = content[pos - 1], nxt = content[pos + 1];
+    controls = `
+      <hr>
+      <nav aria-label="Navegación entre apartados">
+        ${prev ? `<button data-go="${prev.id}">← Anterior</button>` : ""}
+        <button data-go="inicio">Inicio</button>
+        ${nxt ? `<button data-go="${nxt.id}">Siguiente →</button>` : ""}
+      </nav>
+      <p>Apartado ${pos + 1} de ${content.length}: ${esc(page.title)}</p>`;
+  }
+
+  app.innerHTML = miga + page.html() + controls;
+  bindGo(app);
+  if (page.init) page.init();
+  renderNav();
+  document.title = page.title + " | Cáncer de mama";
+  history.replaceState(null, "", "#" + page.id);
+  app.focus();
+  window.scrollTo(0, 0);
+}
+
+window.addEventListener("hashchange", () => {
+  const id = location.hash.slice(1);
+  if (id && PAGES[current].id !== id) goTo(id);
+});
+
+goTo(location.hash.slice(1) || "inicio");
+</script>
+</body>
+</html>
