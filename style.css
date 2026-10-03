@@ -5,14 +5,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;700;800&display=swap');
 
 :root {
-  --bg-page: #FAFADF;
+  --bg-page: #FFF0F8;
   --bg-surface: #FFFFFF;
 
-  --color-primary: #E8635A;
-  --color-secondary: #7B6CF6;
-  --color-teal: #4ECDC4;
-  --color-yellow: #FFE566;
-  --color-pink: #F9A8B8;
+  --color-primary: #C93B8E;
+  --color-secondary: #6D4AE0;
+  --color-teal: #DDB5F5;
+  --color-yellow: #FBCFE8;
+  --color-pink: #F9A8D4;
   --color-lavender: #C4B5FD;
 
   --border-color: #111111;
@@ -36,14 +36,14 @@
   --text-secondary: #555555;
 
   /* Decoración (SVG embebido) */
-  --star-yellow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2L17.5 14.5L30 16L17.5 17.5L16 30L14.5 17.5L2 16L14.5 14.5Z' fill='%23FFE566' stroke='%23111' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
-  --star-pink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2L17.5 14.5L30 16L17.5 17.5L16 30L14.5 17.5L2 16L14.5 14.5Z' fill='%23F9A8B8' stroke='%23111' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
-  --star-purple: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2L17.5 14.5L30 16L17.5 17.5L16 30L14.5 17.5L2 16L14.5 14.5Z' fill='%237B6CF6' stroke='%23111' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
-  --star-teal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2L17.5 14.5L30 16L17.5 17.5L16 30L14.5 17.5L2 16L14.5 14.5Z' fill='%234ECDC4' stroke='%23111' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
-  --star-coral: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2L17.5 14.5L30 16L17.5 17.5L16 30L14.5 17.5L2 16L14.5 14.5Z' fill='%23E8635A' stroke='%23111' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
-  --blob-pink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cpath d='M40 5C55 3 76 18 75 40C74 62 58 76 40 75C20 74 4 60 6 40C8 20 24 7 40 5Z' fill='%23F9A8B8' stroke='%23111' stroke-width='2'/%3E%3C/svg%3E");
+  --star-yellow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2L17.5 14.5L30 16L17.5 17.5L16 30L14.5 17.5L2 16L14.5 14.5Z' fill='%23F9A8D4' stroke='%23111' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --star-pink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2L17.5 14.5L30 16L17.5 17.5L16 30L14.5 17.5L2 16L14.5 14.5Z' fill='%23F9A8D4' stroke='%23111' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --star-purple: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2L17.5 14.5L30 16L17.5 17.5L16 30L14.5 17.5L2 16L14.5 14.5Z' fill='%236D4AE0' stroke='%23111' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --star-teal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2L17.5 14.5L30 16L17.5 17.5L16 30L14.5 17.5L2 16L14.5 14.5Z' fill='%23DDB5F5' stroke='%23111' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --star-coral: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2L17.5 14.5L30 16L17.5 17.5L16 30L14.5 17.5L2 16L14.5 14.5Z' fill='%23C93B8E' stroke='%23111' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --blob-pink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cpath d='M40 5C55 3 76 18 75 40C74 62 58 76 40 75C20 74 4 60 6 40C8 20 24 7 40 5Z' fill='%23F9A8D4' stroke='%23111' stroke-width='2'/%3E%3C/svg%3E");
   --blob-lavender: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cpath d='M44 4C62 8 77 24 74 44C71 64 54 77 36 74C16 70 4 54 7 36C10 18 28 0 44 4Z' fill='%23C4B5FD' stroke='%23111' stroke-width='2'/%3E%3C/svg%3E");
-  --blob-teal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cpath d='M38 5C58 2 78 22 74 42C70 62 52 78 34 73C14 68 3 50 8 32C12 16 24 7 38 5Z' fill='%234ECDC4' stroke='%23111' stroke-width='2'/%3E%3C/svg%3E");
+  --blob-teal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cpath d='M38 5C58 2 78 22 74 42C70 62 52 78 34 73C14 68 3 50 8 32C12 16 24 7 38 5Z' fill='%23DDB5F5' stroke='%23111' stroke-width='2'/%3E%3C/svg%3E");
 }
 
 /* =========================================================
@@ -53,7 +53,7 @@
 
 [hidden] { display: none !important; }
 
-html { scroll-behavior: auto; }
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
@@ -87,7 +87,7 @@ body::before {
     98% 96%, 8% 6%;
 }
 
-header, main { position: relative; z-index: 1; max-width: 1040px; margin-left: auto; margin-right: auto; }
+header, main, footer { position: relative; z-index: 1; max-width: 1040px; margin-left: auto; margin-right: auto; }
 
 ::selection { background: var(--color-yellow); color: var(--text-primary); }
 
@@ -103,7 +103,7 @@ header, main { position: relative; z-index: 1; max-width: 1040px; margin-left: a
 h1, h2, h3, h4 {
   font-family: var(--font);
   color: var(--text-primary);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: -0.01em;
   line-height: 1.15;
 }
@@ -491,6 +491,20 @@ figure img { width: 100%; box-shadow: none; }
 figcaption { margin-top: 10px; font-size: 0.8rem; line-height: 1.4; color: var(--text-secondary); word-break: break-word; }
 
 /* =========================================================
+   FOOTER
+   ========================================================= */
+footer {
+  margin-top: 48px;
+  padding: 18px 24px;
+  text-align: center;
+  background: var(--color-pink);
+  border: var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+footer p { margin: 0; font-size: 0.85rem; font-weight: 500; color: var(--text-primary); }
+
+/* =========================================================
    RESPONSIVE
    ========================================================= */
 @media (max-width: 760px) {
@@ -554,7 +568,7 @@ main > h2 {
   width: 100%; margin: 0; padding: 16px 18px; text-align: left;
   background: var(--bg-surface); color: var(--text-primary);
 }
-.card-btn strong { font-size: 1rem; text-transform: uppercase; }
+.card-btn strong { font-size: 1rem; }
 .card-btn span { font-weight: 400; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4; }
 .card-btn:hover:not(:disabled) { background: var(--bg-page); }
 
@@ -831,3 +845,4 @@ main > h2 + * { margin-top: 24px; }
 /* =========================================================
    RENDIMIENTO AL HACER SCROLL
    ========================================================= */
+body::before, #gato, #oso, main::before, main::after { will-change: transform; }
